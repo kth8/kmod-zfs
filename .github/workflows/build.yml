@@ -11,7 +11,7 @@ on:
 env:
     IMAGE_NAME: akmod-zfs
     IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
-    SOURCE_IMAGE: quay.io/fedora-ostree-desktops/base
+    SOURCE_IMAGE: base
     SOURCE_VERSION: 38
 
 jobs:
@@ -31,8 +31,10 @@ jobs:
         shell: bash
         run: |
           # Generate a timestamp for creating an image version history
-          KERNEL_VERSION="$(skopeo inspect docker://${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')"
-          BUILD_TAGS=("${KERNEL_VERSION}" "latest")
+          TIMESTAMP="$(date +%Y%m%d)"
+          MAJOR_VERSION="${{ env.SOURCE_VERSION }}"
+          KERNEL_VERSION="$(skopeo inspect docker://quay.io/fedora-ostree-desktops/${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')"
+          BUILD_TAGS=("${MAJOR_VERSION}" "${MAJOR_VERSION}-${TIMESTAMP}" "${KERNEL_VERSION}" "latest")
 
           echo "Generated the following build tags: "
           for TAG in "${BUILD_TAGS[@]}"; do
@@ -45,9 +47,9 @@ jobs:
       - name: Get current version
         id: labels
         run: |
-          ver=$(skopeo inspect docker://${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["org.opencontainers.image.version"]')
+          ver=$(skopeo inspect docker://quay.io/fedora-ostree-desktops/${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["org.opencontainers.image.version"]')
           echo "VERSION=$ver" >> $GITHUB_OUTPUT
-          kern=$(skopeo inspect docker://${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')
+          kern=$(skopeo inspect docker://quay.io/fedora-ostree-desktops/${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')
           echo "KERNEL=$kern" >> $GITHUB_OUTPUT
 
       - name: Image Metadata

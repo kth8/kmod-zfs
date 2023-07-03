@@ -1,4 +1,5 @@
-ARG BASE_IMAGE="quay.io/fedora-ostree-desktops/base"
+ARG SOURCE_IMAGE="${SOURCE_IMAGE:-base}"
+ARG BASE_IMAGE="quay.io/fedora-ostree-desktops/${SOURCE_IMAGE}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-38}"
 
 FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} as builder
