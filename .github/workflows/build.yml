@@ -1,7 +1,7 @@
 name: build-akmod-zfs
 on:
   schedule:
-    - cron: '0 8 * * *'  # 08:00 UTC everyday
+    - cron: '0 7 * * *'
   push:
     branches:
       - main
@@ -11,6 +11,7 @@ on:
 env:
     IMAGE_NAME: akmod-zfs
     IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+    SOURCE_IMAGE: quay.io/fedora-ostree-desktops/base
     SOURCE_VERSION: 38
 
 jobs:
@@ -30,7 +31,7 @@ jobs:
         shell: bash
         run: |
           # Generate a timestamp for creating an image version history
-          KERNEL_VERSION="$(skopeo inspect docker://quay.io/fedora-ostree-desktops/base:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')"
+          KERNEL_VERSION="$(skopeo inspect docker://${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')"
           BUILD_TAGS=("${KERNEL_VERSION}" "latest")
 
           echo "Generated the following build tags: "
@@ -44,8 +45,10 @@ jobs:
       - name: Get current version
         id: labels
         run: |
-          ver=$(skopeo inspect docker://quay.io/fedora-ostree-desktops/base:${{ env.SOURCE_VERSION }} | jq -r '.Labels["org.opencontainers.image.version"]')
+          ver=$(skopeo inspect docker://${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["org.opencontainers.image.version"]')
           echo "VERSION=$ver" >> $GITHUB_OUTPUT
+          kern=$(skopeo inspect docker://${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')
+          echo "KERNEL=$kern" >> $GITHUB_OUTPUT
 
       - name: Image Metadata
         uses: docker/metadata-action@v4
@@ -55,8 +58,9 @@ jobs:
             ${{ env.IMAGE_NAME }}
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
-            org.opencontainers.image.description=Work in progress
+            org.opencontainers.image.description=Compiled against ${{ steps.labels.outputs.KERNEL }}
             org.opencontainers.image.version=${{ steps.labels.outputs.VERSION }}
+            org.opencontainers.image.kernel=${{ steps.labels.outputs.KERNEL }}
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
             
       # Build image using Buildah action
