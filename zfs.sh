@@ -19,7 +19,3 @@ ln -s /usr/bin/ld.bfd /etc/alternatives/ld && ln -s /etc/alternatives/ld /usr/bi
 
 rm -fv *src.rpm *devel*.rpm *debug*.rpm *test*.rpm zfs-dracut*.rpm
 mv -v *.rpm /var/tmp/
-
-FROM scratch
-
-COPY --from=builder /var/tmp /rpms

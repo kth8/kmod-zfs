@@ -5,3 +5,7 @@ FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} as builder
 
 COPY zfs.sh /tmp/zfs.sh
 RUN chmod +x /tmp/zfs.sh && /tmp/zfs.sh
+
+FROM scratch
+
+COPY --from=builder /var/tmp /rpms
