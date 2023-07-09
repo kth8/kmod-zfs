@@ -6,7 +6,7 @@ FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} as builder
 ARG KERNEL_VERSION="${KERNEL_VERSION}"
 ARG ZFS_VERSION="${ZFS_VERSION}"
 
-RUN rpm-ostree install -y dkms gcc make autoconf automake libtool rpm-build libtirpc-devel libblkid-devel \
+RUN rpm-ostree install dkms gcc make autoconf automake libtool rpm-build libtirpc-devel libblkid-devel \
 	libuuid-devel libudev-devel openssl-devel zlib-devel libaio-devel libattr-devel elfutils-libelf-devel \
 	kernel-modules-${KERNEL_VERSION} kernel-devel-${KERNEL_VERSION} python3-devel python3-setuptools \
 	python3-cffi libffi-devel ncompress libcurl-devel
