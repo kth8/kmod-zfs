@@ -1,12 +1,8 @@
-ARG SOURCE_IMAGE="${SOURCE_IMAGE:-base}"
+ARG SOURCE_IMAGE="${SOURCE_IMAGE:-silverblue}"
 ARG BASE_IMAGE="quay.io/fedora-ostree-desktops/${SOURCE_IMAGE}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-38}"
 
 FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} as builder
-
-#COPY zfs.sh /tmp/zfs.sh
-#RUN chmod +x /tmp/zfs.sh && /tmp/zfs.sh
-
 ARG KERNEL_VERSION="${KERNEL_VERSION}"
 ARG ZFS_VERSION="${ZFS_VERSION}"
 
@@ -20,11 +16,10 @@ RUN curl -L https://github.com/openzfs/zfs/releases/download/${ZFS_VERSION}/${ZF
 RUN tar -xzf /tmp/${ZFS_VERSION}.tar.gz -C /tmp
 
 WORKDIR /tmp/${ZFS_VERSION}
-RUN ./configure -with-linux=/usr/src/kernels/${KERNEL_VERSION}/ -with-linux-obj=/usr/src/kernels/${KERNEL_VERSION}/ 
+RUN ./configure -with-linux=/usr/src/kernels/${KERNEL_VERSION} -with-linux-obj=/usr/src/kernels/${KERNEL_VERSION}
 RUN make -j rpm-utils rpm-kmod
-RUN rm -fv *src.rpm *devel*.rpm *debug*.rpm *test*.rpm zfs-dracut*.rpm
+RUN rm -fv *src.rpm *devel*.rpm *debug*.rpm *test*.rpm *dracut*.rpm
 RUN mv -v *.rpm /var/tmp/
 
 FROM scratch
-
 COPY --from=builder /var/tmp /rpms
