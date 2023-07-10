@@ -31,10 +31,8 @@ jobs:
         shell: bash
         run: |
           # Generate a timestamp for creating an image version history
-          TIMESTAMP="$(date +%Y%m%d)"
-          MAJOR_VERSION="${{ env.SOURCE_VERSION }}"
           KERNEL_VERSION="$(skopeo inspect docker://quay.io/fedora-ostree-desktops/${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')"
-          BUILD_TAGS=("${MAJOR_VERSION}" "${MAJOR_VERSION}-${TIMESTAMP}" "${KERNEL_VERSION}" "latest")
+          BUILD_TAGS=("${KERNEL_VERSION}" "latest")
 
           echo "Generated the following build tags: "
           for TAG in "${BUILD_TAGS[@]}"; do
@@ -51,7 +49,7 @@ jobs:
           echo "VERSION=$ver" >> $GITHUB_OUTPUT
           kern=$(skopeo inspect docker://quay.io/fedora-ostree-desktops/${{ env.SOURCE_IMAGE }}:${{ env.SOURCE_VERSION }} | jq -r '.Labels["ostree.linux"]')
           echo "KERNEL_VERSION=$kern" >> $GITHUB_OUTPUT
-          zfs=$(curl -s https://api.github.com/repos/openzfs/zfs/releases/latest | jq -r .tag_name)
+          zfs=$(curl -s https://api.github.com/repos/openzfs/zfs/releases/latest | jq -r '.tag_name')
           echo "ZFS_VERSION=$zfs" >> $GITHUB_OUTPUT
 
       - name: Image Metadata
