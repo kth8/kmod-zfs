@@ -53,7 +53,7 @@ jobs:
           echo "ZFS_VERSION=$zfs" >> $GITHUB_OUTPUT
 
       - name: Image Metadata
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         id: meta
         with:
           images: |
